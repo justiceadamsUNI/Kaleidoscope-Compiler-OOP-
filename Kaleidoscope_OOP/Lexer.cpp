@@ -9,8 +9,6 @@
 
 Token Lexer::getToken()
 {
-	int LastChar = ' ';
-
 	// Skip any whitespace.
 	while (isspace(LastChar))
 		LastChar = getchar();

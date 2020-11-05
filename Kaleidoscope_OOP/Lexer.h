@@ -9,5 +9,5 @@ public:
 	Token getToken();
 
 private:
-	static int LastChar;
+	int LastChar = ' ';
 };
