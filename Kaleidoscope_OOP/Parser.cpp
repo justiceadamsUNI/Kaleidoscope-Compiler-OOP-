@@ -4,7 +4,7 @@
 /**
 * Changes made by justice: all memory allocation for AST's happens here. All AST's are collapsed into one large
 * AST. This is the nature of abstract syntax trees. Thus, when the final tree is deleted from the heap, it will trigger
-* the proper destructors on each of the AST nodes themselves (which ate themselves AST's). The decision to use
+* the proper destructors on each of the AST nodes themselves (which are themselves AST's). The decision to use
 * pointers to const data is explained in AST.h
 */
 
@@ -90,6 +90,11 @@ void Parser::HandleDefinition()
 	const FunctionAST* Definition = ParseDefinition();
 	if (Definition) {
 		fprintf(stderr, "Parsed a function definition.\n");
+		if (auto* FnIR = const_cast<FunctionAST*>(Definition)->accept(CodeGenVisitor)) {
+			fprintf(stderr, "Read function definition:");
+			FnIR->print(errs());
+			fprintf(stderr, "\n");
+		}
 		delete Definition; // Clean up the memory allocated for this AST node
 	}
 	else {
@@ -103,6 +108,12 @@ void Parser::HandleExtern()
 	const PrototypeAST* Extern = ParseExtern();
 	if (Extern) {
 		fprintf(stderr, "Parsed an extern\n");
+		if (auto* FnIR = const_cast<PrototypeAST*>(Extern)->accept(CodeGenVisitor)) {
+			fprintf(stderr, "Read extern: ");
+			FnIR->print(errs());
+			fprintf(stderr, "\n");
+		}
+
 		delete Extern; // Clean up the memory allocated for this AST node
 	}
 	else {
@@ -117,6 +128,14 @@ void Parser::HandleTopLevelExpression()
 	const FunctionAST* TopLevelException = ParseTopLevelExpr();
 	if (TopLevelException) {
 		fprintf(stderr, "Parsed a top-level expr\n");
+		if (auto* FnIR = const_cast<FunctionAST*>(TopLevelException)->accept(CodeGenVisitor)) {
+			fprintf(stderr, "Read top-level expression:");
+			FnIR->print(errs());
+			fprintf(stderr, "\n");
+
+			// Remove the anonymous expression.
+			((Function*) FnIR)->eraseFromParent();
+		}
 		delete TopLevelException; // Clean up the memory allocated for this AST node
 	}
 	else {
@@ -154,6 +173,12 @@ void Parser::MainLoop()
 			break;
 		}
 	}
+}
+
+void Parser::PrintLLIRModule()
+{
+	// Delegate call to the codegen module (visitor)
+	CodeGenVisitor->PrintIR();
 }
 
 const ExprAST* Parser::LogError(const char * Str)

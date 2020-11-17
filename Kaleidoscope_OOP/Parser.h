@@ -2,6 +2,7 @@
 #include <map>
 #include "Lexer.h"
 #include "AST.h"
+#include "IRCodeGen.h"
 
 using namespace std;
 
@@ -21,9 +22,20 @@ public:
 	/// top ::= definition | external | expression | ';'
 	void MainLoop();
 
+	// Dumps code gen LLIR from code gen Module to stdout
+	void PrintLLIRModule();
+
+	~Parser() {
+		// free up memory from code gen module
+		delete CodeGenVisitor;
+	};
+
 private:
 	// Handle to the Scanner instance which will be used by this Parser
 	Lexer Scanner;
+
+	// Create object to handle LLIR code generation via visitor pattern
+	ASTCodeGenVisitor* CodeGenVisitor = new ASTCodeGenVisitor;
 
 	/// CurTok/getNextToken - Provide a simple token buffer.  CurTok is the current
 	/// token the parser is looking at.  getNextToken reads another token from the
@@ -35,6 +47,7 @@ private:
 
 	const PrototypeAST* LogErrorP(const char *Str);
 
+	// Method for getting the next scanner token
 	Token getNextToken();
 
 	/// GetTokPrecedence - Get the precedence of the pending binary operator token.

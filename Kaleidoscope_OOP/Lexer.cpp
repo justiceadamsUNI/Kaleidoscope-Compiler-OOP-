@@ -14,7 +14,7 @@ Token Lexer::getToken()
 		LastChar = getchar();
 
 	if (isalpha(LastChar)) { // identifier: [a-zA-Z][a-zA-Z0-9]*
-		std::string IdentifierStr;
+		string IdentifierStr;
 		IdentifierStr = LastChar;
 
 		while (isalnum((LastChar = getchar())))
@@ -33,7 +33,7 @@ Token Lexer::getToken()
 	}
 
 	if (isdigit(LastChar) || LastChar == '.') { // Number: [0-9.]+
-		std::string NumStr;
+		string NumStr;
 		do {
 			NumStr += LastChar;
 			LastChar = getchar();
