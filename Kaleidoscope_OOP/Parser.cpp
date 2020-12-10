@@ -125,10 +125,10 @@ void Parser::HandleExtern()
 void Parser::HandleTopLevelExpression()
 {
 	// Evaluate a top-level expression into an anonymous function.
-	const FunctionAST* TopLevelException = ParseTopLevelExpr();
-	if (TopLevelException) {
+	const FunctionAST* TopLevelExpression = ParseTopLevelExpr();
+	if (TopLevelExpression) {
 		fprintf(stderr, "Parsed a top-level expr\n");
-		if (auto* FnIR = const_cast<FunctionAST*>(TopLevelException)->accept(CodeGenVisitor)) {
+		if (auto* FnIR = const_cast<FunctionAST*>(TopLevelExpression)->accept(CodeGenVisitor)) {
 			fprintf(stderr, "Read top-level expression:");
 			FnIR->print(errs());
 			fprintf(stderr, "\n");
@@ -136,7 +136,7 @@ void Parser::HandleTopLevelExpression()
 			// Remove the anonymous expression.
 			((Function*) FnIR)->eraseFromParent();
 		}
-		delete TopLevelException; // Clean up the memory allocated for this AST node
+		delete TopLevelExpression; // Clean up the memory allocated for this AST node
 	}
 	else {
 		// Skip token for error recovery.

@@ -9,6 +9,22 @@
 * Again, we don't want to enforce visitors to work on only const nodes (see AST.h)
 */
 
+ASTCodeGenVisitor::ASTCodeGenVisitor() {
+	InitializeModuleAndPassManager();
+}
+
+void ASTCodeGenVisitor::InitializeModuleAndPassManager() {
+	TheContext = new LLVMContext();
+	TheModule = new Module("my cool jit", *TheContext);
+	TheModule->setDataLayout(JIT.TheJIT->getDataLayout());
+	Builder = new IRBuilder<>(*TheContext);
+	IROptimizer = new Optimizer(TheModule, TheContext);
+}
+
+void ASTCodeGenVisitor::InitializeJIT() {
+	JIT = JITRuntimeWrapper();
+}
+
 void ASTCodeGenVisitor::PrintIR() {
 	// Print out all of the generated code.
 	TheModule->print(errs(), nullptr);
@@ -87,7 +103,7 @@ Value* ASTCodeGenVisitor::visit(PrototypeAST* ProtypeExpr)
 		FunctionType::get(Type::getDoubleTy(*TheContext), Doubles, false);
 
 	Function* F =
-		Function::Create(FT, Function::ExternalLinkage, ProtypeExpr->Name, TheModule);
+		Function::Create(FT, Function::ExternalLinkage, "__anon_expr", TheModule);
 
 	// Set names for all arguments.
 	unsigned Idx = 0;
@@ -126,6 +142,29 @@ Value* ASTCodeGenVisitor::visit(FunctionAST* FunctionExpr)
 
 		// Optimize the function.
 		IROptimizer->optimize(TheFunction);
+		
+		// Create a ResourceTracker to track JIT'd memory allocated to our
+		// anonymous expression -- that way we can free it after executing.
+		auto RT = JIT.TheJIT->getMainJITDylib().createResourceTracker();
+
+		auto TSM = orc::ThreadSafeModule(
+			move(unique_ptr<Module>(TheModule)),
+			move(unique_ptr<LLVMContext>(TheContext))
+		);
+
+		JIT.ExitOnError(JIT.TheJIT->addModule(move(TSM), RT));
+		InitializeModuleAndPassManager();
+
+		// Search the JIT for the __anon_expr symbol.
+		auto ExprSymbol = JIT.ExitOnError(JIT.TheJIT->lookup("__anon_expr"));
+
+		// Get the symbol's address and cast it to the right type (takes no
+		// arguments, returns a double) so we can call it as a native function.
+		double (*FP)() = (double (*)())(intptr_t)ExprSymbol.getAddress();
+		fprintf(stderr, "Evaluated to %f\n", FP());
+
+		// Delete the anonymous expression module from the JIT.
+		JIT.ExitOnError(RT->remove());
 
 		return TheFunction;
 	}

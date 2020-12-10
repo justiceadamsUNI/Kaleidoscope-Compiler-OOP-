@@ -10,8 +10,10 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Type.h"
 #include "llvm/IR/Verifier.h"
+#include "llvm/Support/Error.h"
 #include "AST.h"
 #include "Optimizer.h"
+#include "JITRuntimeWrapper.h"
 
 /**
 * Changes made by justice: We use a visitor pattern for code generation as opposed to an overridden abstract method.
@@ -26,6 +28,8 @@ using namespace llvm;
 class ASTCodeGenVisitor : public ExprASTVisitor<Value*>
 {
 public:
+	ASTCodeGenVisitor();
+
 	Value* visit(NumberExprAST* NumberExpr);
 	Value* visit(VariableExprAST* VariableExpr);
 	Value* visit(BinaryExprAST* BinaryExprAST);
@@ -43,9 +47,15 @@ public:
 	}
 
 private:
-	LLVMContext* TheContext = new LLVMContext();
-	Module* TheModule = new Module("my cool jit", *TheContext);
-	IRBuilder<>* Builder = new IRBuilder<>(*TheContext);
-	Optimizer* IROptimizer = new Optimizer(TheModule, TheContext);
+	LLVMContext* TheContext;
+	Module* TheModule;
+	IRBuilder<>* Builder;
+	Optimizer* IROptimizer;
 	map<string, Value*> NamedValues;
+	JITRuntimeWrapper JIT;
+
+	// Private function for reinitializing a new module for JIT'ing
+	void InitializeModuleAndPassManager();
+
+	void InitializeJIT();
 };
