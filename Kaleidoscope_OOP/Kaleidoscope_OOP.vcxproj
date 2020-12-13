@@ -49,8 +49,9 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -107,12 +108,12 @@
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\dev\llvm-project\llvm\include;C:\dev\llvm-build-2019\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\dev\llvm-project\llvm\include;C:\dev\llvm-build-ninja\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\dev\llvm-build-2019\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\dev\llvm-build-ninja\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>LLVMDemangle.lib;LLVMAnalysis.lib;LLVMCore.lib;LLVMExecutionEngine.lib;LLVMInstCombine.lib;LLVMObject.lib;LLVMOrcJIT.lib;LLVMRuntimeDyld.lib;LLVMScalarOpts.lib;LLVMSupport.lib;LLVMX86CodeGen.lib;LLVMX86AsmParser.lib;LLVMX86Desc.lib;LLVMX86Disassembler.lib;LLVMX86Info.lib;LLVMExecutionEngine.lib;LLVMRuntimeDyld.lib;LLVMJITLink.lib;LLVMOrcError.lib;LLVMPasses.lib;LLVMCoroutines.lib;LLVMHelloNew.lib;LLVMObjCARCOpts.lib;LLVMipo.lib;LLVMInstrumentation.lib;LLVMVectorize.lib;LLVMFrontendOpenMP.lib;LLVMIRReader.lib;LLVMAsmParser.lib;LLVMLinker.lib;LLVMAsmPrinter.lib;LLVMDebugInfoDWARF.lib;LLVMCFGuard.lib;LLVMGlobalISel.lib;LLVMSelectionDAG.lib;LLVMCodeGen.lib;LLVMScalarOpts.lib;LLVMInstCombine.lib;LLVMAggressiveInstCombine.lib;LLVMTarget.lib;LLVMTransformUtils.lib;LLVMBitWriter.lib;LLVMAnalysis.lib;LLVMProfileData.lib;LLVMObject.lib;LLVMBitReader.lib;LLVMCore.lib;LLVMRemarks.lib;LLVMBitstreamReader.lib;LLVMTextAPI.lib;LLVMMCParser.lib;LLVMMCDisassembler.lib;LLVMMC.lib;LLVMBinaryFormat.lib;LLVMDebugInfoCodeView.lib;LLVMDebugInfoMSF.lib;LLVMSupport.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -140,23 +141,26 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_HAS_EXCEPTIONS=0;GTEST_HAS_RTTI=0;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_SCL_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;UNICODE;_UNICODE;__STDC_CONSTANT_MACROS;__STDC_FORMAT_MACROS;__STDC_LIMIT_MACROS;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\dev\llvm-project\llvm\include;C:\dev\llvm-build-2019\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\dev\llvm-project\llvm\include;C:\dev\llvm-build-ninja\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\dev\llvm-build-2019\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>LLVMCore.lib;LLVMSupport.lib;LLVMBinaryFormat.lib;LLVMRemarks.lib;LLVMBitstreamReader.lib;LLVMSupport.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\dev\llvm-build-ninja\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>LLVMAnalysis.lib;LLVMCore.lib;LLVMExecutionEngine.lib;LLVMInstCombine.lib;LLVMObject.lib;LLVMOrcJIT.lib;LLVMRuntimeDyld.lib;LLVMScalarOpts.lib;LLVMSupport.lib;LLVMX86CodeGen.lib;LLVMX86AsmParser.lib;LLVMX86Desc.lib;LLVMX86Disassembler.lib;LLVMX86Info.lib;LLVMExecutionEngine.lib;LLVMRuntimeDyld.lib;LLVMPasses.lib;LLVMCoroutines.lib;LLVMHelloNew.lib;LLVMipo.lib;LLVMFrontendOpenMP.lib;LLVMIRReader.lib;LLVMAsmParser.lib;LLVMLinker.lib;LLVMObjCARCOpts.lib;LLVMVectorize.lib;LLVMInstrumentation.lib;LLVMJITLink.lib;LLVMOrcTargetProcess.lib;LLVMOrcShared.lib;LLVMAsmPrinter.lib;LLVMDebugInfoDWARF.lib;LLVMGlobalISel.lib;LLVMSelectionDAG.lib;LLVMCodeGen.lib;LLVMScalarOpts.lib;LLVMInstCombine.lib;LLVMAggressiveInstCombine.lib;LLVMTarget.lib;LLVMTransformUtils.lib;LLVMBitWriter.lib;LLVMAnalysis.lib;LLVMProfileData.lib;LLVMObject.lib;LLVMBitReader.lib;LLVMTextAPI.lib;LLVMCFGuard.lib;LLVMCore.lib;LLVMRemarks.lib;LLVMBitstreamReader.lib;LLVMMCParser.lib;LLVMMCDisassembler.lib;LLVMMC.lib;LLVMBinaryFormat.lib;LLVMDebugInfoCodeView.lib;LLVMDebugInfoMSF.lib;LLVMSupport.lib;LLVMDemangle.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AST.h" />
