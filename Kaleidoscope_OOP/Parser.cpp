@@ -94,6 +94,15 @@ void Parser::HandleDefinition()
 			fprintf(stderr, "Read function definition:");
 			FnIR->print(errs());
 			fprintf(stderr, "\n");
+
+			auto TSM = orc::ThreadSafeModule(
+				move(unique_ptr<Module>(CodeGenVisitor->TheModule)),
+				move(unique_ptr<LLVMContext>(CodeGenVisitor->TheContext))
+			);
+
+			CodeGenVisitor->JIT.ExitOnError(CodeGenVisitor->JIT.TheJIT->addModule(move(TSM)));
+			
+			CodeGenVisitor->InitializeModuleAndPassManager();
 		}
 		delete Definition; // Clean up the memory allocated for this AST node
 	}
@@ -129,12 +138,32 @@ void Parser::HandleTopLevelExpression()
 	if (TopLevelExpression) {
 		fprintf(stderr, "Parsed a top-level expr\n");
 		if (auto* FnIR = const_cast<FunctionAST*>(TopLevelExpression)->accept(CodeGenVisitor)) {
-			fprintf(stderr, "Read top-level expression:");
-			FnIR->print(errs());
-			fprintf(stderr, "\n");
+			fprintf(stderr, "Read top-level expression: ");
+			// Notes from Justice: This is where JIT implementation starts!
 
-			// Remove the anonymous expression.
-			((Function*) FnIR)->eraseFromParent();
+			// Create a ResourceTracker to track JIT'd memory allocated to our
+			// anonymous expression -- that way we can free it after executing.
+			auto RT = CodeGenVisitor->JIT.TheJIT->getMainJITDylib().createResourceTracker();
+
+			auto TSM = orc::ThreadSafeModule(
+				move(unique_ptr<Module>(CodeGenVisitor->TheModule)),
+				move(unique_ptr<LLVMContext>(CodeGenVisitor->TheContext))
+			);
+
+			CodeGenVisitor->JIT.ExitOnError(CodeGenVisitor->JIT.TheJIT->addModule(move(TSM), RT));
+			CodeGenVisitor->InitializeModuleAndPassManager();
+
+			// Search the JIT for the __anon_expr symbol.
+			auto ExprSymbol = CodeGenVisitor->JIT.ExitOnError(CodeGenVisitor->JIT.TheJIT->lookup("__anon_expr"));
+
+			// Get the symbol's address and cast it to the right type (takes no
+			// arguments, returns a double) so we can call it as a native function.
+			double (*FP)() = (double (*)())(intptr_t)ExprSymbol.getAddress();
+			fprintf(stderr, "Evaluated to %f\n", FP());
+
+			// Delete the anonymous expression module from the JIT.
+			CodeGenVisitor->JIT.ExitOnError(RT->remove());
+			fprintf(stderr, "\n");
 		}
 		delete TopLevelExpression; // Clean up the memory allocated for this AST node
 	}

@@ -30,6 +30,11 @@ class ASTCodeGenVisitor : public ExprASTVisitor<Value*>
 public:
 	ASTCodeGenVisitor();
 
+	// Publicly needed CodeGen elements for JIT execution
+	LLVMContext* TheContext;
+	Module* TheModule;
+	JITRuntimeWrapper JIT;
+
 	Value* visit(NumberExprAST* NumberExpr);
 	Value* visit(VariableExprAST* VariableExpr);
 	Value* visit(BinaryExprAST* BinaryExprAST);
@@ -37,7 +42,11 @@ public:
 	Value* visit(PrototypeAST* PrototypeAST);
 	Value* visit(FunctionAST* FunctionAST);
 
-	void PrintIR(); // public method for pretty-printing code-gen
+	// public function for reinitializing a new module for JIT'ing (needed by the parser)
+	void InitializeModuleAndPassManager();
+
+	// public method for pretty-printing code-gen
+	void PrintIR(); 
 
 	~ASTCodeGenVisitor() {
 		delete TheContext;
@@ -47,15 +56,7 @@ public:
 	}
 
 private:
-	LLVMContext* TheContext;
-	Module* TheModule;
 	IRBuilder<>* Builder;
 	Optimizer* IROptimizer;
 	map<string, Value*> NamedValues;
-	JITRuntimeWrapper JIT;
-
-	// Private function for reinitializing a new module for JIT'ing
-	void InitializeModuleAndPassManager();
-
-	void InitializeJIT();
 };
