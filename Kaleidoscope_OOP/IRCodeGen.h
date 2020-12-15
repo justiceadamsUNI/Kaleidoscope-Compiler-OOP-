@@ -34,6 +34,7 @@ public:
 	LLVMContext* TheContext;
 	Module* TheModule;
 	JITRuntimeWrapper JIT;
+	map<string, const PrototypeAST*> FunctionProtos;
 
 	Value* visit(NumberExprAST* NumberExpr);
 	Value* visit(VariableExprAST* VariableExpr);
@@ -47,6 +48,9 @@ public:
 
 	// public method for pretty-printing code-gen
 	void PrintIR(); 
+
+	// public function for keeping track of Prototypes across IR modules.
+	Function* getFunction(string Name);
 
 	~ASTCodeGenVisitor() {
 		delete TheContext;

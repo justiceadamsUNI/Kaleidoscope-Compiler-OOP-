@@ -104,7 +104,6 @@ void Parser::HandleDefinition()
 			
 			CodeGenVisitor->InitializeModuleAndPassManager();
 		}
-		delete Definition; // Clean up the memory allocated for this AST node
 	}
 	else {
 		// Skip token for error recovery.
@@ -121,6 +120,7 @@ void Parser::HandleExtern()
 			fprintf(stderr, "Read extern: ");
 			FnIR->print(errs());
 			fprintf(stderr, "\n");
+			CodeGenVisitor->FunctionProtos[Extern->Name] = move(Extern);
 		}
 
 		delete Extern; // Clean up the memory allocated for this AST node

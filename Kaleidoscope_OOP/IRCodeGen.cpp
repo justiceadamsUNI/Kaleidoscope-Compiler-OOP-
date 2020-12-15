@@ -26,6 +26,22 @@ void ASTCodeGenVisitor::PrintIR() {
 	TheModule->print(errs(), nullptr);
 }
 
+Function* ASTCodeGenVisitor::getFunction(string Name)
+{
+	// First, see if the function has already been added to the current module.
+	if (auto* F = TheModule->getFunction(Name))
+		return F;
+
+	// If not, check whether we can codegen the declaration from some existing
+	// prototype.
+	auto FI = FunctionProtos.find(Name);
+	if (FI != FunctionProtos.end())
+		return (Function*) const_cast<PrototypeAST*>(FI->second)->accept(this);
+
+	// If no existing prototype exists, return null.
+	return nullptr;
+}
+
 Value* ASTCodeGenVisitor::visit(NumberExprAST* NumberExpr)
 {
 	return ConstantFP::get(*TheContext, APFloat(NumberExpr->Val));
@@ -68,7 +84,7 @@ Value* ASTCodeGenVisitor::visit(BinaryExprAST* BinaryExpr)
 Value* ASTCodeGenVisitor::visit(CallExprAST* CallExpr)
 {
 	// Look up the name in the global module table.
-	Function* CalleeF = TheModule->getFunction(CallExpr->Callee);
+	Function* CalleeF = getFunction(CallExpr->Callee);
 	if (!CalleeF) {
 		LogError("Unknown function referenced");
 		return nullptr;
@@ -99,7 +115,7 @@ Value* ASTCodeGenVisitor::visit(PrototypeAST* ProtypeExpr)
 		FunctionType::get(Type::getDoubleTy(*TheContext), Doubles, false);
 
 	Function* F =
-		Function::Create(FT, Function::ExternalLinkage, "__anon_expr", TheModule);
+		Function::Create(FT, Function::ExternalLinkage, ProtypeExpr->Name, TheModule);
 
 	// Set names for all arguments.
 	unsigned Idx = 0;
@@ -111,12 +127,11 @@ Value* ASTCodeGenVisitor::visit(PrototypeAST* ProtypeExpr)
 
 Value* ASTCodeGenVisitor::visit(FunctionAST* FunctionExpr)
 {
-	// First, check for an existing function from a previous 'extern' declaration.
-	Function* TheFunction = TheModule->getFunction(FunctionExpr->Proto->Name);
-
-	if (!TheFunction)
-		TheFunction = (Function*) const_cast<PrototypeAST*>(FunctionExpr->Proto)->accept(this);
-
+	// Transfer ownership of the prototype to the FunctionProtos map, but keep a
+	// reference to it for use below.
+	auto& P = FunctionExpr->Proto;
+	FunctionProtos[FunctionExpr->Proto->Name] = FunctionExpr->Proto;
+	Function* TheFunction = getFunction(FunctionExpr->Proto->Name);
 	if (!TheFunction)
 		return nullptr;
 
